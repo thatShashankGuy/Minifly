@@ -1,0 +1,98 @@
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+          http-equiv="Content-Security-Policy"
+          content="script-src 'self' 'unsafe-inline'"
+        />
+        <link rel="stylesheet" href="css/all.min.css" />
+        <link rel="stylesheet" href="css/materialize.min.css" />
+        <link rel="stylesheet" href="css/style.css" />
+        <link rel="stylesheet" href="css/font-awesome.css" />
+        
+        <title>MiniFly</title>
+</head>
+<!-- The information between the BODY and /BODY tags is displayed.-->
+<body>
+<div class="container center-align">
+    <h3><i class ='fas fa-handshake-o'>MiniFly</i></h3>
+    <p>Minify you image on fly using MiniFly</p>
+    <form id="image-form">
+        <div class="file-field input-field">
+            <div class="btn blue">
+                <span>Browse</span>
+                <input type="file" id ="img" />
+            </div>
+            <div class="file-path-wrapper">
+              <span
+              type="text"
+              class="file-path validate"
+              placeholder="Upload file"
+              id="inner-path"
+            ></span>
+          </div>
+        </div>
+       <p> <strong>Image Quality</strong></p>
+        <em>Minifly reduces the file size which would result in loss of image quality</em>
+
+        <p class="range-field">
+            <input type="range" min ="0" max = "100" id="slider"/>
+                    </p>
+                    
+        <input type="submit" value="Resize" class = "btn Red"/>
+    </form>
+  
+        <div class="card output">
+        <div class="card-content green">
+            Your file are saved at  : <span id='outer-path'></span>
+        </div>
+    </div>
+   
+    
+</div>
+
+<script scr ="js/materialize.min.js"></script>
+<script>
+
+const path = require('path')
+const os = require('os')
+const { ipcRenderer } = require("electron")
+const form = document.getElementById('image-form')
+const slider = document.getElementById('slider')
+const img = document.getElementById('img')
+
+document.getElementById('img').addEventListener('change',() => {
+  const fileName = img.files[0].path.replace(/^.*[\\\/]/, '');
+  document.getElementById('inner-path').innerText = fileName
+})
+
+
+
+const outpath = document.getElementById('outer-path').innerText = path.join(
+        os.homedir(),
+        'MiniFlySaves'
+      )
+
+form.addEventListener('submit', e => {
+    e.preventDefault();
+    
+    const imgpath = img.files[0].path;
+    const quality = slider.value;
+    
+    
+    ipcRenderer.send('image:minimize',{
+        imgpath,
+        quality 
+    })                
+})
+
+ipcRenderer.on('image:done',() =>{
+
+  alert(`Thank you for using Minifly. You can find your reduced file at ${outpath}`)
+})
+
+</script>
+</body>
+
+</html>
